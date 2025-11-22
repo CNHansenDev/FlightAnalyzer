@@ -1,34 +1,36 @@
 import pandas as pd
+import ast
 
 
 def organize_data(file_path="data/flights_cache.csv"):
     df = pd.read_csv(file_path)
 
-    datetime_cols = ["departure.scheduled", "arrival.scheduled"]
+    dictionary_cols = ['departure', 'arrival', 'airline']
 
-    for col in datetime_cols:
+    for col in dictionary_cols:
+        if col in df.columns:
+            df[col] = df[col].apply(lambda x: ast.literal_eval(x) if pd.notna(x) else {})
+
+    # Extract fields from nested dicts
+    df['departure_airport'] = df['departure'].apply(lambda x: x.get('airport', 'Unknown'))
+    df['arrival_airport'] = df['arrival'].apply(lambda x: x.get('airport', 'Unknown'))
+    df['departure_delay'] = df['departure'].apply(lambda x: x.get('delay', 0) or 0)
+    df['arrival_delay'] = df['arrival'].apply(lambda x: x.get('delay', 0) or 0)
+    df['total_delay'] = df['departure_delay'] + df['arrival_delay']
+    df['airline_name'] = df['airline'].apply(lambda x: x.get('name', 'Unknown'))
+    df['departure_scheduled'] = df['departure'].apply(lambda x: x.get('scheduled', pd.NaT))
+    df['arrival_scheduled'] = df['arrival'].apply(lambda x: x.get('scheduled', pd.NaT))
+
+    df['departure_scheduled'] = pd.to_datetime(df['departure_scheduled'], errors='coerce')
+    df['arrival_scheduled'] = pd.to_datetime(df['arrival_scheduled'], errors='coerce')
+
+    # Convert datetime columns
+    for col in ['departure_scheduled', 'arrival_scheduled']:
         if col in df.columns:
             df[col] = pd.to_datetime(df[col], errors='coerce')
-        else:
-            df[col] = pd.NaT
 
-    depart_delay = 'departure.delay'
-    arrival_delay = 'arrival.delay'
-
-    if 'depart_delay' in df.columns and 'arrival_delay' in df.columns:
-        df['total_delay'] = df['depart_delay'].fillna(0) + df['arrival_delay'].fillna(0)
-    else:
-        df['total_delay'] = None
-
-    essential_cols = ['departure.airport', 'arrival.airport']
-    for col in essential_cols:
-        if col not in df.columns:
-            df[col] = None
-
-
-    df = df.dropna(subset=essential_cols)
-
-    df = df.dropna(subset=["departure.scheduled", "arrival.scheduled"])
+    # Drop rows with missing essential data
+    df = df.dropna(subset=['departure_airport', 'arrival_airport'])
 
     df.columns = [col.replace('.', '_') for col in df.columns]
 
