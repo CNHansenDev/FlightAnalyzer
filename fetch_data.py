@@ -16,3 +16,5 @@ if __name__ == "__main__":
     df = fetch_flights(params)
     df.to_csv("data/flights_cache.csv", index=False)
     print("Data fetched and saved to flights_cache.csv")
+
+
