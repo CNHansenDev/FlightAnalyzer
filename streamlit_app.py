@@ -6,6 +6,9 @@ import ast
 
 from graph_flights import graph_flights
 
+st.set_page_config(page_title="Flight Dashboard", layout="wide")
+
+
 
 # -----------------------
 # Load Data
@@ -59,9 +62,9 @@ print(flights_summary.columns)
 # -----------------------
 # Streamlit Layout
 # -----------------------
-st.title("✈️ Flight Dashboard")
-st.write("Live flight data processed through AviationStack + Airport Merging + Route Visualization")
-
+st.title("🛫 Flight Dashboard 🛬")
+st.write("Live flight data processed through AviationStack + open-source airport data.")
+st.write("Maps projected with folium and dashboard created with Streamlit.")
 
 
 # -----------------------
@@ -125,7 +128,7 @@ filtered_summary = filtered_summary.dropna(subset=['dep_lat','dep_lon','arr_lat'
 
 
 
-tabs = st.tabs(["Overview", "Routes Map", "Airlines", "Airports", "Data Explorer"])
+tabs = st.tabs(["   🎫✈️   Overview   ", "   🗺️⁀જ✈︎   Routes Map   ", "   🛫👨‍✈️   Airlines   ", "   🏢🛩️   Airports   ", "   📊📈   Data Explorer   "])
 overview_tab, routes_tab, airlines_tab, airports_tab, data_tab = tabs
 
 with overview_tab:
@@ -155,7 +158,7 @@ with overview_tab:
     col5.metric("Most Common Route", most_common_route)
 
 with routes_tab:
-    st.subheader("Flight Route Map")
+    st.subheader("Flight Route Map 🗺️")
 
     if len(filtered_summary) > 0:
         # Only proceed with map creation if there are flights to display
@@ -179,7 +182,7 @@ with routes_tab:
         st.info("No flights match the current filter selection to display on the map.")
 
 with airlines_tab:
-    st.subheader("Flight Analytics")
+    st.subheader("Flight Analytics 🛫")
     graph_flights(filtered_summary)
 
 with data_tab:
